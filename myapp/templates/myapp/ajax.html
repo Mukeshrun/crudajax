@@ -1,0 +1,68 @@
+<script>
+    $('#btnsave').click(function () {
+        output = ''
+        let sid = $('#stuid').val();
+        let name = $('#name').val();
+        let email = $('#email').val();
+        let password = $('#password').val();
+        let csrf = $("input[name=csrfmiddlewaretoken").val();
+        {
+            data = {stuid:sid ,name: name, email: email, password: password, csrfmiddlewaretoken: csrf };
+            $.ajax({
+                url: '{% url "save" %}',
+                method: 'POST',
+                data: data,
+                success: function (data) {
+                    x = data.key
+                    if (data.status == 'Form succesfully submitted') {
+                        for (i = 0; i < x.length; i++) {
+                            output += "<tr><td>" + x[i].id + "</td><td>" + x[i].name + "</td><td>" + x[i].email + "</td><td>" + x[i].password + "</td><td><input type='button' class='btn btn-warning btn-sm btn-edit' value='Edit' data-sid=" + x[i].id + "><input type='button' class='btn btn-danger btn-sm btn-del' value='Delete' data-sid=" + x[i].id +
+                                 ">";
+                        }
+                        $('#tbody').html(output);
+                        $('#stuid').val('');
+                        $('form')[0].reset();
+                    }
+                    if (data.status == 0) {
+                        alert('Error in sumitting form')
+                    }
+                }
+            })
+        }
+    })
+// Delete mthod
+$('tbody').on('click','.btn-del',function(){
+let id=$(this).attr("data-sid");
+csrf=$('input[name=csrfmiddlewaretoken').val();
+mythis=this;
+data={sid:id,csrfmiddlewaretoken:csrf}
+$.ajax({
+    url:'{% url "delete" %}',
+    type:'POST',
+    data:data,
+    success:function(data){
+$(mythis).closest('tr').fadeOut();
+    }
+
+})
+})
+// Edit method
+$('tbody').on('click','.btn-edit',function(){
+let id=$(this).attr("data-sid");
+csrf=$('input[name=csrfmiddlewaretoken').val();
+data={sid:id,csrfmiddlewaretoken:csrf}
+$.ajax({
+    url:'{% url "edit" %}',
+    type:'POST',
+    data:data,
+    success:function(data){
+
+        $('#stuid').val(data.id);
+        $('#name').val(data.name);
+        $('#email').val(data.email);
+        $('#password').val(data.password);
+    }
+
+})
+})
+</script>
